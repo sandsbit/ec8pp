@@ -43,11 +43,13 @@ int main(int argc, char **argv) {
     else
         file = openFileDialog();
 
-    Graphics &graphics = Graphics::getInstance();
-    graphics.init();
-
     Emulator emulator(file);
+
+    Graphics &graphics = Graphics::getInstance();
+    graphics.init(&emulator);
+
     emulator.initEmulatorThread();
+
     graphics.loop();
 
     return 0;

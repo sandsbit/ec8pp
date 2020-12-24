@@ -39,6 +39,8 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+class Emulator;
+
 /**
  * Render graphics using OpenGL.
  */
@@ -63,7 +65,7 @@ public:
      *
      * Should be called only once!
      */
-    void init(bool fullscreen = true, std::size_t width = 640);
+    void init(Emulator *emulator, bool fullscreen = true, std::size_t width = 640);
     void loop();
 
     void clearScreen();
@@ -77,6 +79,8 @@ private:
     GLFWwindow *window;
     std::mutex screenMutex;
     std::array<std::bitset<32>, 64> screen;
+
+    Emulator *emulator;
 
     Graphics();
     virtual ~Graphics();

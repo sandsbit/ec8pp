@@ -35,6 +35,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "emulator.h"
+#include "timers.h"
+
 static void errorCallback(int error, const char* description) {
     std::cerr << "Error: " << description << std::endl;
 }
@@ -56,8 +59,9 @@ Graphics::~Graphics() {
     glfwTerminate();
 }
 
-void Graphics::init(bool fullscreen, std::size_t width) {
+void Graphics::init(Emulator *em, bool fullscreen, std::size_t width) {
     WIDTH = width;
+    emulator = em;
 
     if (width % 64 != 0)
         throw std::runtime_error("Invalid resolution: width should be multiple of 64.");
@@ -110,6 +114,12 @@ void Graphics::loop() {
 
         glfwSwapBuffers(window);
     }
+
+    emulator->quitEmulatorThread();
+    emulator->joinEmulatorThread();
+
+    Timers::getInstance().closeAudioThread();
+    Timers::getInstance().joinAudioThread();
 }
 
 void Graphics::clearScreen() {
