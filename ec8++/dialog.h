@@ -27,8 +27,8 @@
  *  see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef EC8_FILE_DIALOG_H
-#define EC8_FILE_DIALOG_H
+#ifndef EC8_DIALOG_H
+#define EC8_DIALOG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,8 +41,13 @@ extern "C" {
  */
 char *openFileDialog(void);
 
+/**
+ * Show error message dialog with given message.
+ */
+void *errorMessageDialog(const char *msg);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif //EC8_FILE_DIALOG_H
+#endif //EC8_DIALOG_H

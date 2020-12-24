@@ -27,4 +27,4 @@
  *  see <https://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog.h"
+#include "dialog.h"
