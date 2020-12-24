@@ -31,7 +31,7 @@
 #define EC8_GRAPHICS_H
 
 #include <utility>
-#include <thread>
+#include <mutex>
 #include <cstdint>
 #include <bitset>
 #include <array>
@@ -75,6 +75,7 @@ private:
     std::size_t PIXEL_WIDTH;
 
     GLFWwindow *window;
+    std::mutex screenMutex;
     std::array<std::bitset<32>, 64> screen;
 
     Graphics();

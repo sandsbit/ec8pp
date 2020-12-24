@@ -95,6 +95,7 @@ void Graphics::loop() {
 
         glColor3f(0.2f, 0.3f, 0.3f);
         int i = -1;
+        screenMutex.lock();
         for (const auto &line : screen) {
             std::size_t yOffset = (++i) * PIXEL_WIDTH;
 
@@ -105,21 +106,26 @@ void Graphics::loop() {
                     glRecti(xOffset, yOffset, xOffset + PIXEL_WIDTH, yOffset + PIXEL_WIDTH);
             }
         }
+        screenMutex.unlock();
 
         glfwSwapBuffers(window);
     }
 }
 
 void Graphics::clearScreen() {
+    screenMutex.lock();
     for (auto &line : screen)
         line.reset();
+    screenMutex.unlock();
 }
 
 void Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite) {
+    screenMutex.lock();
     for (auto i = y; i < y + height; ++i) {
         std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + i);
         for (auto j = x; j < x + 8; ++j) {
             screen[i][j] = (j & ( 1 << line )) >> line;  // j-th bit of line
         }
     }
+    screenMutex.unlock();
 }
