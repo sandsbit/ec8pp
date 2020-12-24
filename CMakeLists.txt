@@ -11,6 +11,6 @@ add_subdirectory(lib/glad)
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenAL REQUIRED)
 
-add_executable(ec8pp ec8++/main.cpp ec8++/graphics.cpp ec8++/graphics.h ec8++/openal.h ec8++/timers.cpp ec8++/timers.h)
+add_executable(ec8pp ec8++/main.cpp ec8++/graphics.cpp ec8++/graphics.h ec8++/openal.h ec8++/timers.cpp ec8++/timers.h ec8++/emulator.cpp ec8++/emulator.h)
 target_link_libraries(ec8pp PUBLIC glfw glad opengl)
 target_link_libraries(ec8pp PRIVATE Threads::Threads)
