@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.17)
 project(ec8++ VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
-add_executable(ec8pp ec8++/main.cpp)
-target_include_directories(ec8pp PRIVATE ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
-target_link_libraries(ec8pp ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
+add_subdirectory(lib/glad)
+
+find_package(glfw3 3.3 REQUIRED)
+
+add_executable(ec8pp ec8++/main.cpp ec8++/graphics.cpp ec8++/graphics.h)
+target_link_libraries(ec8pp PUBLIC glfw glad)
+target_link_libraries(ec8pp PRIVATE Threads::Threads)
