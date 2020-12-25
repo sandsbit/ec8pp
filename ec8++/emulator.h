@@ -104,12 +104,12 @@ private:
 
     std::uint16_t *game;
 
-    std::stack<void *> stack;
+    std::stack<std::uint16_t *> stack;
     std::uint16_t *PC;
 
     void *memory;
     std::array<std::uint8_t, 16> V;
-    std::uint16_t I;
+    std::uint8_t *I;
 
     Graphics * const graphics = &Graphics::getInstance();
     Timers * const timers = &Timers::getInstance();

@@ -32,6 +32,19 @@
 #include <filesystem>
 #include <cstdlib>
 #include <fstream>
+#include <type_traits>
+#include <sstream>
+#include <random>
+
+#define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - game))
+
+template <typename T>
+typename std::enable_if<std::is_arithmetic_v<T>, std::string>::type numberToHexString(T x) {
+    std::stringstream stream;
+    stream << std::setfill ('0') << std::setw(sizeof(T)*2)
+    << std::showbase << std::hex << x;
+    return stream.str();
+}
 
 Emulator::Emulator(const std::filesystem::path &file) {
     loadGame(file);
@@ -74,4 +87,197 @@ void Emulator::joinEmulatorThread() {
 
 void Emulator::quitEmulatorThread() {
     quit = true;
+}
+
+void Emulator::SYS([[maybe_unused]] std::uint16_t addr) {}
+
+void Emulator::CLS() {
+    graphics->clearScreen();
+}
+
+#define NDEBUG
+
+void Emulator::RET() {
+#ifdef NDEBUG
+    if (stack.empty())
+        throw std::runtime_error(INVALID_INSTRUCTION + ": \"Cannot return: not in subroutine\"");
+#endif
+    PC = stack.top();
+    stack.pop();
+}
+
+void Emulator::JP(std::uint16_t addr) {
+#ifdef NDEBUG
+    if (addr > 4*1024)
+        throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
+#endif
+    PC = game + addr;
+}
+
+void Emulator::CALL(std::uint16_t addr) {
+#ifdef NDEBUG
+    if (addr > 4*1024)
+        throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
+#endif
+    stack.push(PC + 1);
+    PC = game + addr;
+}
+
+void Emulator::SE(std::uint8_t x, std::uint8_t byte) {
+    assert(x <= 0xF);
+    if (V[x] == byte)
+        PC += 2;
+}
+
+void Emulator::SNE(std::uint8_t x, std::uint8_t byte) {
+    assert(x <= 0xF);
+    if (V[x] != byte)
+        PC += 2;
+}
+
+void Emulator::SEXY(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    if (V[x] == V[y])
+        PC += 2;
+}
+
+void Emulator::LD(std::uint8_t x, std::uint8_t byte) {
+    assert(x <= 0xF);
+    V[x] = byte;
+}
+
+void Emulator::ADD(std::uint8_t x, std::uint8_t byte) {
+    assert(x <= 0xF);
+    V[x] += byte;
+}
+
+void Emulator::LDXY(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[x] = V[y];
+}
+
+void Emulator::OR(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[x] = V[x] | V[y];
+}
+
+void Emulator::AND(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[x] = V[x] & V[y];
+}
+
+void Emulator::XOR(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[x] = V[x] ^ V[y];
+}
+
+void Emulator::ADDXY(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[0xF] = __builtin_add_overflow(V[x], V[y], &V[x]);
+}
+
+void Emulator::SUB(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[0xF] = !__builtin_sub_overflow(V[x], V[y], &V[x]);
+}
+
+void Emulator::SHR(std::uint8_t x, [[maybe_unused]] std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[0xF] = x & 1;
+    V[x] >>= 1;
+}
+
+void Emulator::SUBN(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[0xF] = !__builtin_sub_overflow(V[y], V[x], &V[x]);
+}
+
+void Emulator::SHL(std::uint8_t x, [[maybe_unused]] std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    V[0xF] = (x >> 7) & 1;
+    V[x] <<= 1;
+}
+
+void Emulator::SNEXY(std::uint8_t x, std::uint8_t y) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    if (V[x] != V[y])
+        PC += 2;
+}
+
+void Emulator::LD(std::uint16_t addr) {
+    I = static_cast<uint8_t *>(memory) + addr;
+}
+
+void Emulator::JPV0(std::uint16_t addr) {
+    JP(addr + V[0]);
+}
+
+void Emulator::RND(std::uint8_t x, std::uint8_t byte) {
+    assert(x <= 0xF);
+    std::random_device r;
+    std::default_random_engine e(r());
+    std::uniform_int_distribution<std::uint8_t> uniform_dist(0, 255);
+
+    V[x] = uniform_dist(e) & byte;
+}
+
+void Emulator::DRAW(std::uint8_t x, std::uint8_t y, std::uint8_t byte) {
+    assert(x <= 0xF);
+    assert(y <= 0xF);
+    assert(byte <= 0xF);
+
+    V[0xF] = graphics->drawSprite(V[x], V[y], byte, static_cast<void *>(I));
+}
+
+void Emulator::LDT(std::uint8_t x) {
+    assert(x <= 0xF);
+    V[x] = timers->getDelayTimerValue();
+}
+
+void Emulator::LDTSET(std::uint8_t x) {
+    assert(x <= 0xF);
+    timers->setDelayTimer(x);
+}
+
+void Emulator::LDATSET(std::uint8_t x) {
+    assert(x <= 0xF);
+    timers->setAudioTimer(x);
+}
+
+void Emulator::ADDI(std::uint8_t x) {
+    assert(x <= 0xF);
+    I += V[x];
+}
+
+void Emulator::LDISPR(std::uint8_t x) {
+    assert(x <= 0xF);
+    I = static_cast<uint8_t *>(memory) + V[x];
+}
+
+void Emulator::LDBCD(std::uint8_t x) {
+    assert(x <= 0xF);
+    *I = V[x] % 10;
+    *(I+1) = (V[x] % 100 - *I) / 10;
+    *(I+2) = (V[x] - *I - *(I + 1)) / 100;
+}
+
+void Emulator::LDREGMEM(std::uint8_t x) {
+    assert(x <= 0xF);
+    memcpy(I, V.data(), x + 1);
+}
+
+void Emulator::LDRREGMEM(std::uint8_t x) {
+    assert(x <= 0xF);
+    memcpy( V.data(), I, x + 1);
 }
