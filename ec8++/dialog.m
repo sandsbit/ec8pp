@@ -27,4 +27,28 @@
  *  see <https://www.gnu.org/licenses/>.
  */
 
+#import <AppKit/AppKit.h>
+
 #import "dialog.h"
+
+const char *openFileDialog(void) {
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    [panel setAllowsMultipleSelection:YES];
+    [panel setCanChooseDirectories:NO];
+    [panel setCanChooseFiles:YES];
+
+    if ([panel runModal] == NSModalResponseOK) {
+        NSURL *URL = [panel URL];
+        return [URL.absoluteString UTF8String];
+    } else {
+        errorMessageDialog("File wasn't selected!");
+        return NULL;
+    }
+}
+
+void errorMessageDialog(const char *msg) {
+    NSString *description = [NSString stringWithUTF8String:msg];
+    NSError *error = [NSError errorWithDomain:@"me.nikitaserba.ec8pp" code:1 userInfo:@{@"Error reason": description}];
+    NSAlert *alert = [NSAlert alertWithError:error];
+    [alert runModal];
+}

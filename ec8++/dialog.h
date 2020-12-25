@@ -39,12 +39,12 @@ extern "C" {
  *
  * @return pointer to c-string with file path allocated with malloc() (don't forget to use free())
  */
-char *openFileDialog(void);
+const char *openFileDialog(void);
 
 /**
  * Show error message dialog with given message.
  */
-void *errorMessageDialog(const char *msg);
+void errorMessageDialog(const char *msg);
 
 #ifdef __cplusplus
 }
