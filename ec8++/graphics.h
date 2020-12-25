@@ -50,8 +50,8 @@ class Graphics final {
 public:
 
     static constexpr const char *WINDOW_TITLE = "ec8++ - CHIP-8 emulator";
-    std::size_t WIDTH;
-    std::size_t HEIGHT;
+    int WIDTH;
+    int HEIGHT;
 
     static Graphics& getInstance();
 
@@ -68,7 +68,7 @@ public:
      *
      * Should be called only once!
      */
-    void init(Emulator *emulator, bool fullscreen = true, std::size_t width = 640);
+    void init(Emulator *emulator, bool fullscreen = true, int width = 640);
     void loop();
 
     void clearScreen();
@@ -77,7 +77,7 @@ public:
 
 private:
 
-    std::size_t PIXEL_WIDTH;
+    int PIXEL_WIDTH;
 
     GLFWwindow *window;
     std::mutex screenMutex;

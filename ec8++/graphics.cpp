@@ -38,7 +38,7 @@
 #include "emulator.h"
 #include "timers.h"
 
-static void errorCallback(int error, const char* description) {
+static void errorCallback([[maybe_unused]] int error, const char* description) {
     std::cerr << "Error: " << description << std::endl;
 }
 
@@ -59,7 +59,7 @@ Graphics::~Graphics() {
     glfwTerminate();
 }
 
-void Graphics::init(Emulator *em, bool fullscreen, std::size_t width) {
+void Graphics::init(Emulator *em, bool fullscreen, int width) {
     WIDTH = width;
     emulator = em;
 
@@ -79,7 +79,7 @@ void Graphics::init(Emulator *em, bool fullscreen, std::size_t width) {
 
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Could not initialize GLAD!");
 
     glMatrixMode(GL_PROJECTION);
@@ -90,6 +90,8 @@ void Graphics::init(Emulator *em, bool fullscreen, std::size_t width) {
     glLoadIdentity();
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
 void Graphics::loop() {
     while (!glfwWindowShouldClose(window) && !quit) {
         glfwPollEvents();
@@ -101,12 +103,12 @@ void Graphics::loop() {
         int i = -1;
         screenMutex.lock();
         for (const auto &line : screen) {
-            std::size_t yOffset = (++i) * PIXEL_WIDTH;
+            int yOffset = (++i) * PIXEL_WIDTH;
 
             for (int j = 0; j < line.size(); ++j) {
-                std::size_t xOffset = j * PIXEL_WIDTH;
+                int xOffset = j * PIXEL_WIDTH;
 
-                if (line[j])
+                if (line[static_cast<size_t>(j)])
                     glRecti(xOffset, yOffset, xOffset + PIXEL_WIDTH, yOffset + PIXEL_WIDTH);
             }
         }
@@ -121,6 +123,7 @@ void Graphics::loop() {
     Timers::getInstance().closeAudioThread();
     Timers::getInstance().joinAudioThread();
 }
+#pragma clang diagnostic pop
 
 void Graphics::clearScreen() {
     screenMutex.lock();

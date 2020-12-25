@@ -39,9 +39,9 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 static unsigned long long int nowMilliseconds() {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::high_resolution_clock::now().time_since_epoch()
-            ).count();
+    return static_cast<unsigned long long int>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+                ).count());
 }
 
 Timers &Timers::getInstance() {
@@ -67,7 +67,7 @@ std::size_t Timers::getDelayTimerValue() const {
     if (now >= delayTimerFinalTime)
         return 0;
     else
-        return (delayTimerFinalTime - now) * MILLIS_TO_TIMER_VALUE; // NOLINT(cppcoreguidelines-narrowing-conversions)
+        return static_cast<size_t>((static_cast<double>(delayTimerFinalTime - now)) * MILLIS_TO_TIMER_VALUE);
 }
 
 void Timers::setDelayTimer(std::size_t value) {
@@ -78,9 +78,10 @@ void Timers::setDelayTimer(std::size_t value) {
 void Timers::setAudioTimer(std::size_t value) {
     auto now = nowMilliseconds();
     if (audioTimerFinalTime >= now)
-        audioTimerFinalTime += value / MILLIS_TO_TIMER_VALUE;
+        audioTimerFinalTime += static_cast<unsigned long long int>(static_cast<double>(value) / MILLIS_TO_TIMER_VALUE);
     else
-        audioTimerFinalTime = now + (value / MILLIS_TO_TIMER_VALUE);
+        audioTimerFinalTime = now +
+                static_cast<unsigned long long int>((static_cast<double>(value) / MILLIS_TO_TIMER_VALUE));
 }
 
 void Timers::audioLoop() {
@@ -107,7 +108,7 @@ void Timers::audioLoopInit() {
     alBufferData(buffer, format, data, size, freq);
 
     alGenSources(1, &source);
-    alSourcei(source, AL_BUFFER, buffer);
+    alSourcei(source, AL_BUFFER, static_cast<ALint>(buffer));
 }
 
 void Timers::audioLoopDestroy() {

@@ -243,7 +243,7 @@ void Emulator::DRAW(std::uint8_t x, std::uint8_t y, std::uint8_t byte) {
 
 void Emulator::LDT(std::uint8_t x) {
     assert(x <= 0xF);
-    V[x] = timers->getDelayTimerValue();
+    V[x] = static_cast<std::uint8_t>(timers->getDelayTimerValue());
 }
 
 void Emulator::LDTSET(std::uint8_t x) {
