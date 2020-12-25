@@ -32,6 +32,10 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <thread>
+#include <mutex>
+#include <array>
+#include <atomic>
 
 #include "SDL2/SDL.h"
 
@@ -81,6 +85,14 @@ constexpr inline auto getKeyBinding(std::uint8_t key) {
     }
 }
 
+constexpr inline std::uint8_t getKeyCodeByBinding(SDL_KeyCode binding) {
+    for (auto i = 0; i <= 0xF; ++i) {
+        if (getKeyBinding(i) == binding)
+            return i;
+    }
+    return UINT8_MAX;
+}
+
 class Input final {
 
 public:
@@ -93,13 +105,27 @@ public:
     Input& operator=(const Input &) = delete;
     Input& operator=(Input &&) = delete;
 
+    void initInputThread();
+    void quitInputThread();
+    void joinInputThread();
+
     [[nodiscard]] bool isKeyPressed(std::uint8_t key) const;
     [[nodiscard]] std::uint8_t waitUntilKeyPress() const;
 
 private:
 
-    Input();
-    ~Input();
+    void loop();
+
+    std::thread inputThread;
+    std::atomic_bool quit = false;
+
+    std::array<bool, 16> keyPressed{};
+    mutable std::mutex keyPressedMutex;
+    std::atomic_uint8_t keysPressed = 0;
+    std::atomic_uint8_t lastKeyPressed = 0;
+
+    Input() = default;
+    ~Input() = default;
 
 };
 

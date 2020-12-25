@@ -27,6 +27,72 @@
  *  see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstdint>
+#include <mutex>
+#include <thread>
+
 #include "input.h"
 
 #include "SDL2/SDL.h"
+
+Input &Input::getInstance() {
+    static Input instance;
+    return instance;
+}
+
+bool Input::isKeyPressed(std::uint8_t key) const {
+    const std::lock_guard<std::mutex> lock(keyPressedMutex);
+    return keyPressed[key];
+}
+
+void Input::initInputThread() {
+    inputThread = std::thread(&Input::loop, this);
+}
+
+void Input::quitInputThread() {
+    quit = true;
+}
+
+void Input::joinInputThread() {
+    inputThread.join();
+}
+
+std::uint8_t Input::waitUntilKeyPress() const {
+    while (keysPressed == 0);
+    return lastKeyPressed;
+}
+
+void Input::loop() {
+    SDL_Init(SDL_INIT_EVENTS);
+    while (!quit) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (quit)
+                goto quit;  // OH NO! What a bad developer. We'd better use java :/
+            std::uint8_t key;
+            switch (event.type) {
+                case SDL_KEYDOWN:
+                    key = getKeyCodeByBinding(static_cast<SDL_KeyCode>(event.key.keysym.sym));
+                    if (key != UINT8_MAX) {
+                        ++keysPressed;
+                        lastKeyPressed = key;
+                        keyPressedMutex.lock();
+                        keyPressed[key] = true;
+                        keyPressedMutex.unlock();
+                    }
+                    break;
+                case SDL_KEYUP:
+                    key = getKeyCodeByBinding(static_cast<SDL_KeyCode>(event.key.keysym.sym));
+                    if (key != UINT8_MAX) {
+                        --keysPressed;
+                        keyPressedMutex.lock();
+                        keyPressed[key] = false;
+                        keyPressedMutex.unlock();
+                    }
+                    break;
+            }
+        }
+    }
+    quit:
+    SDL_Quit();
+}
