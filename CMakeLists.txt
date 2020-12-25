@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(ec8++ VERSION 1.0 LANGUAGES C CXX OBJC)
+project(ec8++ VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -39,6 +39,8 @@ target_sources(ec8pp PRIVATE ec8++/dialog.cpp)
 
 
 #if (APPLE)
+#    enable_language(OBJC)
+#
 #    find_library(FrameworkFoundation Foundation)
 #    if (NOT FrameworkFoundation)
 #        message(FATAL_ERROR "Foundation framework not found")
