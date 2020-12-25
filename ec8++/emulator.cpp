@@ -126,20 +126,20 @@ void Emulator::CALL(std::uint16_t addr) {
 void Emulator::SE(std::uint8_t x, std::uint8_t byte) {
     assert(x <= 0xF);
     if (V[x] == byte)
-        PC += 2;
+        ++PC;
 }
 
 void Emulator::SNE(std::uint8_t x, std::uint8_t byte) {
     assert(x <= 0xF);
     if (V[x] != byte)
-        PC += 2;
+        ++PC;
 }
 
 void Emulator::SEXY(std::uint8_t x, std::uint8_t y) {
     assert(x <= 0xF);
     assert(y <= 0xF);
     if (V[x] == V[y])
-        PC += 2;
+        ++PC;
 }
 
 void Emulator::LD(std::uint8_t x, std::uint8_t byte) {
@@ -212,7 +212,7 @@ void Emulator::SNEXY(std::uint8_t x, std::uint8_t y) {
     assert(x <= 0xF);
     assert(y <= 0xF);
     if (V[x] != V[y])
-        PC += 2;
+        ++PC;
 }
 
 void Emulator::LD(std::uint16_t addr) {
