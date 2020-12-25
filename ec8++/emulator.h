@@ -51,7 +51,7 @@ class Emulator final {
 
 public:
 
-    Emulator(const std::filesystem::path &file);
+    explicit Emulator(const std::filesystem::path &file);
     ~Emulator();
 
     Emulator(const Emulator &) = delete;
