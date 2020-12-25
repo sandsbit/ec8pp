@@ -120,6 +120,8 @@ private:
     void loadFontInMemory();
     void loadGame(const std::filesystem::path &file);
 
+    void loop();
+
 };
 
 

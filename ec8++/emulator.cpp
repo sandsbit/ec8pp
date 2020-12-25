@@ -62,3 +62,16 @@ Emulator::~Emulator() {
     free(game);
     free(memory);
 }
+
+void Emulator::initEmulatorThread() {
+    quit = false;
+    emulatorThread = std::thread(&Emulator::loop, this);
+}
+
+void Emulator::joinEmulatorThread() {
+    emulatorThread.join();
+}
+
+void Emulator::quitEmulatorThread() {
+    quit = true;
+}
