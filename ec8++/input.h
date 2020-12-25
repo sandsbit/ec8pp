@@ -46,51 +46,43 @@
 #define LIKELY
 #endif
 
-constexpr inline auto getKeyBinding(std::uint8_t key) {
-    switch (key) {
-        case 0x0:
-            return SDL_KeyCode::SDLK_KP_0;
-        case 0x1:
-            return SDL_KeyCode::SDLK_KP_7;
-        LIKELY case 0x2:
-            return SDL_KeyCode::SDLK_KP_8;
-        case 0x3:
-            return SDL_KeyCode::SDLK_KP_9;
-        LIKELY case 0x4:
-            return SDL_KeyCode::SDLK_KP_4;
-        case 0x5:
-            return SDL_KeyCode::SDLK_KP_5;
-        LIKELY case 0x6:
-            return SDL_KeyCode::SDLK_KP_6;
-        case 0x7:
-            return SDL_KeyCode::SDLK_KP_1;
-        LIKELY case 0x8:
-            return SDL_KeyCode::SDLK_KP_2;
-        case 0x9:
-            return SDL_KeyCode::SDLK_KP_3;
-        case 0xA:
-            return SDL_KeyCode::SDLK_KP_PERIOD;
-        case 0xB:
-            return SDL_KeyCode::SDLK_KP_ENTER;
-        case 0xC:
-            return SDL_KeyCode::SDLK_KP_DIVIDE;
-        case 0xD:
-            return SDL_KeyCode::SDLK_KP_MULTIPLY;
-        case 0xE:
-            return SDL_KeyCode::SDLK_KP_MINUS;
-        case 0xF:
-            return SDL_KeyCode::SDLK_KP_PLUS;
-        default:
-            throw std::runtime_error("Invalid key!");
-    }
-}
-
 constexpr inline std::uint8_t getKeyCodeByBinding(SDL_KeyCode binding) {
-    for (auto i = 0; i <= 0xF; ++i) {
-        if (getKeyBinding(i) == binding)
-            return i;
+    switch (binding) {
+        case SDLK_KP_0:
+            return 0x0;
+        case SDLK_KP_1:
+            return 0x7;
+        LIKELY case SDLK_KP_2:
+            return 0x8;
+        case SDLK_KP_3:
+            return 0x9;
+        LIKELY case SDLK_KP_4:
+            return 0x4;
+        case SDLK_KP_5:
+            return 0x5;
+        LIKELY case SDLK_KP_6:
+            return 0x6;
+        case SDLK_KP_7:
+            return 0x3;
+        LIKELY case SDLK_KP_8:
+            return 0x2;
+        case SDLK_KP_9:
+            return 0x1;
+        case SDLK_KP_PERIOD:
+            return 0xA;
+        case SDLK_KP_ENTER:
+            return 0xB;
+        case SDLK_KP_DIVIDE:
+            return 0xC;
+        case SDLK_KP_MULTIPLY:
+            return 0xD;
+        case SDLK_KP_MINUS:
+            return 0xE;
+        case SDLK_KP_PLUS:
+            return 0xF;
+        default:
+            return UINT8_MAX;
     }
-    return UINT8_MAX;
 }
 
 class Input final {
