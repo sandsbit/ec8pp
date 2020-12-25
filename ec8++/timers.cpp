@@ -103,7 +103,7 @@ void Timers::audioLoopInit() {
     ALsizei		size;
     ALsizei		freq;
     ALvoid*		data;
-    alutLoadWAVFile(const_cast<char *>("beep.wav"), &format, &data, &size, &freq);
+    alutLoadWAVFile(const_cast<char *>("assets/beep.wav"), &format, &data, &size, &freq);
     alBufferData(buffer, format, data, size, freq);
 
     alGenSources(1, &source);
