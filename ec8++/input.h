@@ -30,23 +30,14 @@
 #ifndef EC8_INPUT_H
 #define EC8_INPUT_H
 
-enum InputKeys {
-    _0,
-    _1,
-    _2,
-    _4,
-    _5,
-    _6,
-    _7,
-    _8,
-    _9,
-    A,
-    B,
-    C,
-    D,
-    E,
-    F
-};
+#include <cstdint>
+
+#ifdef __cpp_consteval
+consteval
+#else
+constexpr
+#endif
+inline auto getKeyBinding(std::uint8_t key);
 
 class Input final {
 
@@ -60,8 +51,8 @@ public:
     Input& operator=(const Input &) = delete;
     Input& operator=(Input &&) = delete;
 
-    [[nodiscard]] bool isKeyPressed(InputKeys key) const;
-    [[nodiscard]] InputKeys waitUntilKeyPress(InputKeys key) const;
+    [[nodiscard]] bool isKeyPressed(std::uint8_t key) const;
+    [[nodiscard]] std::uint8_t waitUntilKeyPress() const;
 
 private:
 
