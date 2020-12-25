@@ -28,3 +28,22 @@
  */
 
 #include "dialog.h"
+
+#include <iostream>
+#include <cstring>
+
+extern "C" {
+
+    const char *openFileDialog(void) {
+        std::string file;
+        std::cout << "No files given! Enter game file: ";
+        std::cin >> file;
+
+        return strdup(file.c_str());
+    }
+
+    void errorMessageDialog(const char *msg) {
+        std::cout << "Error: " << msg;
+    }
+
+}
