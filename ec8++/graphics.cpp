@@ -129,13 +129,17 @@ void Graphics::clearScreen() {
     screenMutex.unlock();
 }
 
-void Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite) {
+std::uint8_t Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite) {
     screenMutex.lock();
+    bool collision;
     for (auto i = y; i < y + height; ++i) {
         std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + i);
         for (auto j = x; j < x + 8; ++j) {
-            screen[i][j] = (j & ( 1 << line )) >> line;  // j-th bit of line
+            std::uint8_t pixel = (j & ( 1 << line )) >> line;  // j-th bit of line
+            screen[i][j % 32] = screen[i][j] ^ pixel;
+            collision = screen[i][j % 32] & pixel;
         }
     }
     screenMutex.unlock();
+    return collision;
 }
