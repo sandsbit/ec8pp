@@ -67,7 +67,8 @@ void Emulator::loadGame(const std::filesystem::path &file) {
     std::streamsize size = gamef.tellg();
     gamef.seekg(0, std::ios::beg);
 
-    game = static_cast<uint16_t *>(malloc(size));
+    game = static_cast<uint16_t *>(malloc(static_cast<size_t>(size)));
+    gameEnd = game + size/2;
     gamef.read(reinterpret_cast<char *>(game), size);
 }
 
@@ -297,4 +298,168 @@ void Emulator::SKNP(std::uint8_t x) {
 void Emulator::LDK(std::uint8_t x) {
     assert(x <= 0xF);
     V[x] = input->waitUntilKeyPress();
+}
+
+inline std::uint8_t majorFourBitsFromInstruction(std::uint16_t instruction) {
+    return ((instruction) >> 12) & 0b1111;
+}
+
+inline std::uint16_t addressFromInstruction(std::uint16_t instruction) {
+    return instruction & 0x0FFF;
+}
+
+inline std::uint8_t secondPositionRegisterFromInstruction(std::uint16_t instruction) {
+    return (instruction >> 8) & 0b1111;
+}
+
+inline std::uint8_t thirdPositionRegisterFromInstruction(std::uint16_t instruction) {
+    return (instruction >> 4) & 0b1111;
+}
+
+inline std::uint8_t byteFromInstructions(std::uint16_t instruction) {
+    return instruction & 0xFF;
+}
+
+inline std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
+    return instruction & 0xF;
+}
+
+void Emulator::loop() {
+    while ((PC++) != gameEnd && !quit) {
+        auto spr = secondPositionRegisterFromInstruction(*PC);
+        auto tpr = thirdPositionRegisterFromInstruction(*PC);
+        auto ni = nibbleFromInstructions(*PC);
+        auto by = byteFromInstructions(*PC);
+        switch (majorFourBitsFromInstruction(*PC)) {
+            case 0x0:
+                switch (*PC) {
+                    case 0x00E0:
+                        CLS();
+                        break;
+                    case 0x00EE:
+                        RET();
+                        break;
+                    default:
+                        SYS(*PC);
+                }
+                break;
+            case 0x1:
+                JP(addressFromInstruction(*PC));
+                break;
+            case 0x2:
+                CALL(addressFromInstruction(*PC));
+                break;
+            case 0x3:
+                SE(spr, by);
+                break;
+            case 0x4:
+                SNE(spr, by);
+                break;
+            case 0x5:
+                assert(ni == 0);  // TODO: throw
+                SEXY(spr, tpr);
+                break;
+            case 0x6:
+                LD(spr, by);
+                break;
+            case 0x7:
+                ADD(spr, by);
+                break;
+            case 0x8:
+                switch (ni) {
+                    case 0x0:
+                        LDXY(spr, tpr);
+                        break;
+                    case 0x1:
+                        OR(spr, tpr);
+                        break;
+                    case 0x2:
+                        AND(spr, tpr);
+                        break;
+                    case 0x3:
+                        XOR(spr, tpr);
+                        break;
+                    case 0x4:
+                        ADDXY(spr, tpr);
+                        break;
+                    case 0x5:
+                        SUB(spr, tpr);
+                        break;
+                    case 0x6:
+                        SHR(spr, tpr);
+                        break;
+                    case 0x7:
+                        SUBN(spr, tpr);
+                        break;
+                    case 0xE:
+                        SHL(spr, tpr);
+                        break;
+                    default:
+                        throw std::runtime_error(INVALID_INSTRUCTION);
+                }
+                break;
+            case 0x9:
+                assert(ni == 0);  // TODO: throw
+                SNEXY(spr, tpr);
+                break;
+            case 0xA:
+                LD(addressFromInstruction(*PC));
+                break;
+            case 0xB:
+                JPV0(addressFromInstruction(*PC));
+                break;
+            case 0xC:
+                RND(spr, by);
+                break;
+            case 0xD:
+                DRAW(spr, tpr, ni);
+                break;
+            case 0xE:
+                switch (by) {
+                    case 0x9E:
+                        SKP(spr);
+                        break;
+                    case 0xA1:
+                        SKNP(spr);
+                        break;
+                    default:
+                        throw std::runtime_error(INVALID_INSTRUCTION);
+                }
+                break;
+            case 0xF:
+                switch (by) {
+                    case 0x07:
+                        LDT(spr);
+                        break;
+                    case 0x0A:
+                        LDK(spr);
+                        break;
+                    case 0x15:
+                        LDTSET(spr);
+                        break;
+                    case 0x18:
+                        LDATSET(spr);
+                        break;
+                    case 0x1E:
+                        ADDI(spr);
+                        break;
+                    case 0x29:
+                        LDISPR(spr);
+                        break;
+                    case 0x33:
+                        LDBCD(spr);
+                        break;
+                    case 0x55:
+                        LDREGMEM(spr);
+                        break;
+                    case 0x65:
+                        LDRREGMEM(spr);
+                        break;
+                    default:
+                        throw std::runtime_error(INVALID_INSTRUCTION);
+                }
+                break;
+        }
+    }
+    graphics->quitGraphics();
 }

@@ -104,6 +104,7 @@ public:
 private:
 
     std::uint16_t *game;
+    std::uint16_t *gameEnd;
 
     std::stack<std::uint16_t *> stack;
     std::uint16_t *PC;
