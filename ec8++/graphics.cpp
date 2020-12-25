@@ -91,7 +91,7 @@ void Graphics::init(Emulator *em, bool fullscreen, std::size_t width) {
 }
 
 void Graphics::loop() {
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window) && !quit) {
         glfwPollEvents();
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -142,4 +142,8 @@ std::uint8_t Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t h
     }
     screenMutex.unlock();
     return collision;
+}
+
+void Graphics::quitGraphics() {
+    quit = true;
 }

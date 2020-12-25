@@ -32,6 +32,7 @@
 
 #include <utility>
 #include <mutex>
+#include <atomic>
 #include <cstdint>
 #include <bitset>
 #include <array>
@@ -60,6 +61,8 @@ public:
     Graphics& operator=(const Graphics &) = delete;
     Graphics& operator=(Graphics &&) = delete;
 
+    void quitGraphics();
+
     /**
      * Init window.
      *
@@ -81,6 +84,8 @@ private:
     std::array<std::bitset<32>, 64> screen;
 
     Emulator *emulator;
+
+    std::atomic_bool quit = false;
 
     Graphics();
     virtual ~Graphics();
