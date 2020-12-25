@@ -281,3 +281,20 @@ void Emulator::LDRREGMEM(std::uint8_t x) {
     assert(x <= 0xF);
     memcpy( V.data(), I, x + 1);
 }
+
+void Emulator::SKP(std::uint8_t x) {
+    assert(x <= 0xF);
+    if (input->isKeyPressed(V[x]))
+        ++PC;
+}
+
+void Emulator::SKNP(std::uint8_t x) {
+    assert(x <= 0xF);
+    if (!input->isKeyPressed(V[x]))
+        ++PC;
+}
+
+void Emulator::LDK(std::uint8_t x) {
+    assert(x <= 0xF);
+    V[x] = input->waitUntilKeyPress();
+}

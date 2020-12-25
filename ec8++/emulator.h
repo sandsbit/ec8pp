@@ -39,6 +39,7 @@
 
 #include "graphics.h"
 #include "timers.h"
+#include "input.h"
 
 #define ADDRESS std::uint16_t addr
 #define REGISTER_AND_VALUE std::uint8_t x, std::uint8_t byte
@@ -113,6 +114,7 @@ private:
 
     Graphics * const graphics = &Graphics::getInstance();
     Timers * const timers = &Timers::getInstance();
+    Input * const input = &Input::getInstance();
 
     std::thread emulatorThread;
     std::atomic_bool quit;
