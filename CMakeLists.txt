@@ -37,6 +37,14 @@ target_link_libraries(ec8pp PRIVATE Threads::Threads)
 
 target_sources(ec8pp PRIVATE ec8++/dialog.cpp)
 
+if (APPLE)
+    find_library(FrameworkOpenAL OpenAL)
+    if (NOT FrameworkOpenAL)
+        message(FATAL_ERROR "Cocoa framework not found")
+    endif()
+
+    target_link_libraries(ec8pp PUBLIC ${FrameworkOpenAL})
+endif()
 
 #if (APPLE)
 #    enable_language(OBJC)
@@ -51,12 +59,7 @@ target_sources(ec8pp PRIVATE ec8++/dialog.cpp)
 #        message(FATAL_ERROR "Cocoa framework not found")
 #    endif()
 #
-#    find_library(FrameworkOpenAL OpenAL)
-#    if (NOT FrameworkOpenAL)
-#        message(FATAL_ERROR "Cocoa framework not found")
-#    endif()
-#
-#    target_link_libraries(ec8pp PUBLIC ${FrameworkFoundation} ${FrameworkCocoa} ${FrameworkOpenAL})
+#    target_link_libraries(ec8pp PUBLIC ${FrameworkFoundation} ${FrameworkCocoa})
 #    target_sources(ec8pp PRIVATE ec8++/dialog.m)
 #else()
 #    target_sources(ec8pp PRIVATE ec8++/dialog.cpp)
