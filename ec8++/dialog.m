@@ -31,6 +31,8 @@
 
 #import "dialog.h"
 
+#warning "The macOS implementation of dialog.h isn't working at the moment. Will be fixed in future version"
+
 const char *openFileDialog(void) {
     NSOpenPanel *panel = [NSOpenPanel openPanel];
     [panel setAllowsMultipleSelection:YES];
