@@ -52,6 +52,7 @@ class Emulator final {
 public:
 
     Emulator(const std::filesystem::path &file);
+    ~Emulator();
 
     Emulator(const Emulator &) = delete;
     Emulator(Emulator &&) = delete;
@@ -104,17 +105,20 @@ private:
     std::uint16_t *game;
 
     std::stack<void *> stack;
-    std::uint16_t PC;
+    std::uint16_t *PC;
 
     void *memory;
     std::array<std::uint8_t, 16> V;
     std::uint16_t I;
 
-    Graphics &graphics;
-    Timers &timers;
+    Graphics * const graphics = &Graphics::getInstance();
+    Timers * const timers = &Timers::getInstance();
 
     std::thread emulatorThread;
     std::atomic_bool quit;
+
+    void loadFontInMemory();
+    void loadGame(const std::filesystem::path &file);
 
 };
 

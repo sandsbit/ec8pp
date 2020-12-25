@@ -28,3 +28,37 @@
  */
 
 #include "emulator.h"
+
+#include <filesystem>
+#include <cstdlib>
+#include <fstream>
+
+Emulator::Emulator(const std::filesystem::path &file) {
+    loadGame(file);
+    PC = game;
+
+    memory = malloc(4 * 1024);
+    loadFontInMemory();
+}
+
+void Emulator::loadFontInMemory() {
+    std::ifstream font("assets/font.bin", std::ios::ate | std::ios::binary);
+    std::streamsize size = font.tellg();
+    font.seekg(0, std::ios::beg);
+
+    font.read(static_cast<char *>(memory), size);
+}
+
+void Emulator::loadGame(const std::filesystem::path &file) {
+    std::ifstream gamef(file, std::ios::ate | std::ios::binary);
+    std::streamsize size = gamef.tellg();
+    gamef.seekg(0, std::ios::beg);
+
+    game = static_cast<uint16_t *>(malloc(size));
+    gamef.read(reinterpret_cast<char *>(game), size);
+}
+
+Emulator::~Emulator() {
+    free(game);
+    free(memory);
+}
