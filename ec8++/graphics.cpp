@@ -94,8 +94,21 @@ void Graphics::init(Emulator *em, bool fullscreen, int width) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
 void Graphics::loop() {
+    auto lastFPSCountTime = glfwGetTime();
+    std::size_t frames = 0;
+
     while (!glfwWindowShouldClose(window) && !quit) {
         glfwPollEvents();
+
+        ++frames;
+        auto time = glfwGetTime();
+        if (time - lastFPSCountTime >= 1.0)  {
+            frames = static_cast<std::size_t>(static_cast<double>(frames) / (time - lastFPSCountTime));
+            glfwSetWindowTitle(window, (std::string(WINDOW_TITLE) + " - " + std::to_string(frames) + " fps").c_str());
+
+            frames = 0;
+            lastFPSCountTime = time;
+        }
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
