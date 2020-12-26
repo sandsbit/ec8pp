@@ -35,28 +35,42 @@
 #include <type_traits>
 #include <sstream>
 #include <random>
+#include <bit>
 
-#define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - game))
+#define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - reinterpret_cast<std::uint16_t *>(PC)))
+
+static std::uint16_t chipMemoryToInt(const std::uint8_t *buffer) {
+    std::uint16_t i = 0;
+    if constexpr (std::endian::native == std::endian::big) {
+        std::memcpy(&i, buffer, 2);
+    } else {
+        for (std::size_t j = 0; j < 2; ++j)
+            reinterpret_cast<std::uint8_t *>(&i)[1 - j] = buffer[j];
+    }
+    return i;
+}
 
 // TODO: Use C++20 concepts
 template <typename T>
 typename std::enable_if<std::is_arithmetic_v<T>, std::string>::type numberToHexString(T x) {
     std::stringstream stream;
-    stream << std::setfill ('0') << std::setw(sizeof(T)*2)
-    << std::showbase << std::hex << x;
+    stream << "0x" << std::setfill ('0') << std::setw(sizeof(T)*2) << std::hex << x;
     return stream.str();
 }
 
 Emulator::Emulator(const std::filesystem::path &file) {
-    loadGame(file);
-    PC = game;
-
     memory = malloc(4 * 1024);
+    loadGame(file);
+    PC = reinterpret_cast<std::uint16_t *>(memory) + 0x100;
+
     loadFontInMemory();
 }
 
 void Emulator::loadFontInMemory() {
     std::ifstream font("assets/font.bin", std::ios::ate | std::ios::binary);
+    if (!font.is_open()) {
+        throw std::runtime_error("Could not open file: assets/font.bin");
+    }
     std::streamsize size = font.tellg();
     font.seekg(0, std::ios::beg);
 
@@ -65,16 +79,18 @@ void Emulator::loadFontInMemory() {
 
 void Emulator::loadGame(const std::filesystem::path &file) {
     std::ifstream gamef(file, std::ios::ate | std::ios::binary);
+    if (!gamef.is_open()) {
+        throw std::runtime_error("Could not open file: " + file.string());
+    }
     std::streamsize size = gamef.tellg();
     gamef.seekg(0, std::ios::beg);
 
-    game = static_cast<uint16_t *>(malloc(static_cast<size_t>(size)));
-    gameEnd = game + size/2;
-    gamef.read(reinterpret_cast<char *>(game), size);
+    assert(size % 2 == 0);
+    gameEnd = reinterpret_cast<std::uint16_t *>(static_cast<std::uint8_t *>(memory) + 0x200 + size);
+    gamef.read(reinterpret_cast<char *>(memory) + 0x200, size);
 }
 
 Emulator::~Emulator() {
-    free(game);
     free(memory);
 }
 
@@ -113,7 +129,8 @@ void Emulator::JP(std::uint16_t addr) {
     if (addr > 4*1024)
         throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
 #endif
-    PC = game + addr;
+    PC = reinterpret_cast<std::uint16_t *>(static_cast<std::uint8_t *>(memory) + addr);
+    --PC;
 }
 
 void Emulator::CALL(std::uint16_t addr) {
@@ -121,8 +138,9 @@ void Emulator::CALL(std::uint16_t addr) {
     if (addr > 4*1024)
         throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
 #endif
-    stack.push(PC + 1);
-    PC = game + addr;
+    stack.push(PC);
+    PC = reinterpret_cast<std::uint16_t *>(static_cast<std::uint8_t *>(memory) + addr);
+    --PC;
 }
 
 void Emulator::SE(std::uint8_t x, std::uint8_t byte) {
@@ -326,14 +344,22 @@ std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
 }
 
 void Emulator::loop() {
-    while ((PC++) != gameEnd && !quit) {
-        auto spr = secondPositionRegisterFromInstruction(*PC);
-        auto tpr = thirdPositionRegisterFromInstruction(*PC);
-        auto ni = nibbleFromInstructions(*PC);
-        auto by = byteFromInstructions(*PC);
-        switch (majorFourBitsFromInstruction(*PC)) {
+    [[maybe_unused]] std::vector<std::uint16_t> PCHistory{};  // Used for debugging
+    while (PC != gameEnd && !quit) {
+#ifdef NDEBUG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+        PCHistory.emplace_back(reinterpret_cast<std::uint8_t *>(PC) - static_cast<std::uint8_t *>(memory) - 0x200);
+#pragma clang diagnostic pop
+#endif
+        auto instruction = chipMemoryToInt(reinterpret_cast<std::uint8_t *>(PC));
+        auto spr = secondPositionRegisterFromInstruction(instruction);
+        auto tpr = thirdPositionRegisterFromInstruction(instruction);
+        auto ni = nibbleFromInstructions(instruction);
+        auto by = byteFromInstructions(instruction);
+        switch (majorFourBitsFromInstruction(instruction)) {
             case 0x0:
-                switch (*PC) {
+                switch (instruction) {
                     case 0x00E0:
                         CLS();
                         break;
@@ -341,14 +367,14 @@ void Emulator::loop() {
                         RET();
                         break;
                     default:
-                        SYS(*PC);
+                        SYS(instruction);
                 }
                 break;
             case 0x1:
-                JP(addressFromInstruction(*PC));
+                JP(addressFromInstruction(instruction));
                 break;
             case 0x2:
-                CALL(addressFromInstruction(*PC));
+                CALL(addressFromInstruction(instruction));
                 break;
             case 0x3:
                 SE(spr, by);
@@ -404,10 +430,10 @@ void Emulator::loop() {
                 SNEXY(spr, tpr);
                 break;
             case 0xA:
-                LD(addressFromInstruction(*PC));
+                LD(addressFromInstruction(instruction));
                 break;
             case 0xB:
-                JPV0(addressFromInstruction(*PC));
+                JPV0(addressFromInstruction(instruction));
                 break;
             case 0xC:
                 RND(spr, by);
@@ -461,6 +487,7 @@ void Emulator::loop() {
                 }
                 break;
         }
+        PC++;
     }
     graphics->quitGraphics();
 }

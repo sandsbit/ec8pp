@@ -103,13 +103,11 @@ public:
 
 private:
 
-    std::uint16_t *game = nullptr;
-    std::uint16_t *gameEnd = nullptr;
-
     std::stack<std::uint16_t *> stack;
     std::uint16_t *PC;
 
     void *memory;
+    std::uint16_t *gameEnd = nullptr;
     std::array<std::uint8_t, 16> V{};
     std::uint8_t *I = nullptr;
 
