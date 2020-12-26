@@ -103,22 +103,22 @@ public:
 
 private:
 
-    std::uint16_t *game;
-    std::uint16_t *gameEnd;
+    std::uint16_t *game = nullptr;
+    std::uint16_t *gameEnd = nullptr;
 
     std::stack<std::uint16_t *> stack;
     std::uint16_t *PC;
 
     void *memory;
-    std::array<std::uint8_t, 16> V;
-    std::uint8_t *I;
+    std::array<std::uint8_t, 16> V{};
+    std::uint8_t *I = nullptr;
 
     Graphics * const graphics = &Graphics::getInstance();
     Timers * const timers = &Timers::getInstance();
     Input * const input = &Input::getInstance();
 
     std::thread emulatorThread;
-    std::atomic_bool quit;
+    std::atomic_bool quit = false;
 
     void loadFontInMemory();
     void loadGame(const std::filesystem::path &file);

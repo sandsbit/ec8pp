@@ -61,20 +61,20 @@ private:
 
     static constexpr double MILLIS_TO_TIMER_VALUE = 60.0/1000;
 
-    unsigned long long int delayTimerFinalTime;
-    std::atomic_ullong audioTimerFinalTime;
+    unsigned long long int delayTimerFinalTime = 0;
+    std::atomic_ullong audioTimerFinalTime = 0;
 
     std::thread audioPlayThread;
-    std::atomic_bool quit;
+    std::atomic_bool quit = false;
 
-    ALuint buffer;
-    ALuint source;
+    ALuint buffer = 0;
+    ALuint source = 0;
 
     void audioLoop();
     void audioLoopInit();
     void audioLoopDestroy();
 
-    bool playing;
+    bool playing = false;
     void startPlayBeep();
     void stopPlayBeep();
 

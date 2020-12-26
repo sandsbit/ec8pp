@@ -30,7 +30,7 @@
 #include "graphics.h"
 
 #include <iostream>
-#include <exception>
+#include <stdexcept>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -53,7 +53,7 @@ Graphics::Graphics() {
         throw std::runtime_error("Could not init graphics!");
 
     glfwSetErrorCallback(errorCallback);
-};
+}
 
 Graphics::~Graphics() {
     glfwDestroyWindow(window);

@@ -50,8 +50,8 @@ class Graphics final {
 public:
 
     static constexpr const char *WINDOW_TITLE = "ec8++ - CHIP-8 emulator";
-    int WIDTH;
-    int HEIGHT;
+    int WIDTH{};
+    int HEIGHT{};
 
     static Graphics& getInstance();
 
@@ -77,13 +77,13 @@ public:
 
 private:
 
-    int PIXEL_WIDTH;
+    int PIXEL_WIDTH = 0;
 
-    GLFWwindow *window;
+    GLFWwindow *window = nullptr;
     std::mutex screenMutex;
     std::array<std::bitset<32>, 64> screen;
 
-    Emulator *emulator;
+    Emulator *emulator = nullptr;
 
     std::atomic_bool quit = false;
 

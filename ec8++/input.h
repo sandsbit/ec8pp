@@ -46,6 +46,9 @@
 #define LIKELY
 #endif
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++20-extensions"
+// https://youtrack.jetbrains.com/issue/CPP-23503
 constexpr inline std::uint8_t getKeyCodeByBinding(SDL_KeyCode binding) {
     switch (binding) {
         case SDLK_KP_0:
@@ -84,6 +87,7 @@ constexpr inline std::uint8_t getKeyCodeByBinding(SDL_KeyCode binding) {
             return UINT8_MAX;
     }
 }
+#pragma clang diagnostic pop
 
 class Input final {
 
