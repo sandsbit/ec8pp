@@ -26,6 +26,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_subdirectory(lib/glad)
+include_directories(lib/)
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenAL REQUIRED)
