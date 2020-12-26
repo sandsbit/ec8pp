@@ -32,6 +32,8 @@
 #include "dialog.h"
 #include "emulator.h"
 #include "graphics.h"
+#include "timers.h"
+#include "input.h"
 
 int main(int argc, char **argv) {
     if (argc > 2)
@@ -42,6 +44,9 @@ int main(int argc, char **argv) {
         file = argv[1];
     else
         file = openFileDialog();
+
+    Input::getInstance().initInputThread();
+    Timers::getInstance().initAudioThread();
 
     Emulator emulator(file);
 

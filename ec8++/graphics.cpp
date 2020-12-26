@@ -37,6 +37,7 @@
 
 #include "emulator.h"
 #include "timers.h"
+#include "input.h"
 
 static void errorCallback([[maybe_unused]] int error, const char* description) {
     std::cerr << "Error: " << description << std::endl;
@@ -122,6 +123,9 @@ void Graphics::loop() {
 
     Timers::getInstance().closeAudioThread();
     Timers::getInstance().joinAudioThread();
+
+    Input::getInstance().quitInputThread();
+    Input::getInstance().joinInputThread();
 }
 #pragma clang diagnostic pop
 
