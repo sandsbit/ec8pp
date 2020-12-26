@@ -140,11 +140,11 @@ std::uint8_t Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t h
     screenMutex.lock();
     bool collision;
     for (auto i = y; i < y + height; ++i) {
-        std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + i);
+        std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + (i - y));
         for (auto j = x; j < x + 8; ++j) {
-            std::uint8_t pixel = (j & ( 1 << line )) >> line;  // j-th bit of line
-            screen[i][j % 32] = screen[i][j] ^ pixel;
-            collision = screen[i][j % 32] & pixel;
+            std::uint8_t pixel = (line >> (7-(j - x))) & 0b1;
+            collision = collision || (screen[i][j % 64] & pixel);
+            screen[i][j % 64] = screen[i][j] ^ pixel;
         }
     }
     screenMutex.unlock();

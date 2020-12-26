@@ -81,7 +81,7 @@ private:
 
     GLFWwindow *window = nullptr;
     std::mutex screenMutex;
-    std::array<std::bitset<32>, 64> screen;
+    std::array<std::bitset<64>, 32> screen;
 
     Emulator *emulator = nullptr;
 
