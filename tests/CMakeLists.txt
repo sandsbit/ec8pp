@@ -3,6 +3,6 @@ project(ec8pp-tests VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(ec8pp_tests main.cpp)
+add_executable(ec8pp_tests main.cpp ec8++/emulator.cpp ec8++/emulator_functions.h ../ec8++/emulator.cpp)
 
 target_include_directories(ec8pp_tests PUBLIC ../lib ../ec8++)
