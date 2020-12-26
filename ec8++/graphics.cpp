@@ -79,6 +79,7 @@ void Graphics::init(Emulator *em, bool fullscreen, int width) {
         throw std::runtime_error("Could not create window!");
 
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         throw std::runtime_error("Could not initialize GLAD!");
