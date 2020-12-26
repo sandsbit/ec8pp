@@ -38,6 +38,7 @@
 
 #define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - game))
 
+// TODO: Use C++20 concepts
 template <typename T>
 typename std::enable_if<std::is_arithmetic_v<T>, std::string>::type numberToHexString(T x) {
     std::stringstream stream;
@@ -300,27 +301,27 @@ void Emulator::LDK(std::uint8_t x) {
     V[x] = input->waitUntilKeyPress();
 }
 
-inline std::uint8_t majorFourBitsFromInstruction(std::uint16_t instruction) {
+std::uint8_t majorFourBitsFromInstruction(std::uint16_t instruction) {
     return ((instruction) >> 12) & 0b1111;
 }
 
-inline std::uint16_t addressFromInstruction(std::uint16_t instruction) {
+std::uint16_t addressFromInstruction(std::uint16_t instruction) {
     return instruction & 0x0FFF;
 }
 
-inline std::uint8_t secondPositionRegisterFromInstruction(std::uint16_t instruction) {
+std::uint8_t secondPositionRegisterFromInstruction(std::uint16_t instruction) {
     return (instruction >> 8) & 0b1111;
 }
 
-inline std::uint8_t thirdPositionRegisterFromInstruction(std::uint16_t instruction) {
+std::uint8_t thirdPositionRegisterFromInstruction(std::uint16_t instruction) {
     return (instruction >> 4) & 0b1111;
 }
 
-inline std::uint8_t byteFromInstructions(std::uint16_t instruction) {
+std::uint8_t byteFromInstructions(std::uint16_t instruction) {
     return instruction & 0xFF;
 }
 
-inline std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
+std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
     return instruction & 0xF;
 }
 
