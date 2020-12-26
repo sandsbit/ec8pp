@@ -41,7 +41,7 @@ target_sources(ec8pp PRIVATE ec8++/dialog.cpp)
 if (APPLE)
     find_library(FrameworkOpenAL OpenAL)
     if (NOT FrameworkOpenAL)
-        message(FATAL_ERROR "Cocoa framework not found")
+        message(FATAL_ERROR "OpenAL framework not found")
     endif()
 
     target_link_libraries(ec8pp PUBLIC ${FrameworkOpenAL})
