@@ -34,7 +34,6 @@
 #include "emulator.h"
 #include "graphics.h"
 #include "timers.h"
-#include "input.h"
 
 int main(int argc, char **argv) {
     if (argc > 2)
