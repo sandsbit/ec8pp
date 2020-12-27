@@ -346,6 +346,7 @@ std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
 void Emulator::loop() {
     [[maybe_unused]] std::vector<std::uint16_t> PCHistory{};  // Used for debugging
     while (PC != gameEnd && !quit) {
+        auto start = std::chrono::high_resolution_clock::now();
 #ifdef NDEBUG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
@@ -488,6 +489,11 @@ void Emulator::loop() {
                 break;
         }
         PC++;
+        auto end = std::chrono::high_resolution_clock::now();
+        auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        if (diff < tickSize) {
+            std::this_thread::sleep_for(tickSize - diff);
+        }
     }
     graphics->quitGraphics();
 }
