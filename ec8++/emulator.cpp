@@ -287,7 +287,7 @@ void Emulator::ADDI(std::uint8_t x) {
 
 void Emulator::LDISPR(std::uint8_t x) {
     assert(x <= 0xF);
-    I = static_cast<uint8_t *>(memory) + V[x];
+    I = static_cast<uint8_t *>(memory) + (V[x] * 5);
 }
 
 void Emulator::LDBCD(std::uint8_t x) {
