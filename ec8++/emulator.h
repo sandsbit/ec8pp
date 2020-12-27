@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <thread>
 #include <atomic>
+#include <chrono>
 
 #include "graphics.h"
 #include "timers.h"
@@ -102,6 +103,9 @@ public:
     void LDRREGMEM(REGISTER);
 
 private:
+
+    static constexpr long long int frequency = 500;
+    static constexpr auto tickSize = std::chrono::nanoseconds(1000*1000*1000 / frequency);
 
     std::stack<std::uint16_t *> stack;
     std::uint16_t *PC;
