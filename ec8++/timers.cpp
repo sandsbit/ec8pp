@@ -57,10 +57,8 @@ static std::string describeAlError(ALenum error_code) {
     }
 }
 
-#define NDEBUG
-
 static void checkAlError(const std::string &msg) {
-#ifdef NDEBUG
+#ifndef NDEBUG
     ALenum error_code;
     if ((error_code = alGetError()) != AL_NO_ERROR) {
         std::string error_message = msg + ": " + describeAlError(error_code);
@@ -89,7 +87,7 @@ std::string describeAlcError(ALCenum error_code) {
 }
 
 void checkAlcError(ALCdevice *device, const std::string &msg) {
-#ifdef NDEBUG
+#ifndef NDEBUG
     ALCenum error_code;
     if ((error_code = alcGetError(device)) != ALC_NO_ERROR) {
         std::string error_message = msg + ": " + describeAlcError(error_code);

@@ -118,10 +118,9 @@ void Emulator::CLS() {
     graphics->clearScreen();
 }
 
-#define NDEBUG
 
 void Emulator::RET() {
-#ifdef NDEBUG
+#ifndef NDEBUG
     if (stack.empty())
         throw std::runtime_error(INVALID_INSTRUCTION + ": \"Cannot return: not in subroutine\"");
 #endif
@@ -130,7 +129,7 @@ void Emulator::RET() {
 }
 
 void Emulator::JP(std::uint16_t addr) {
-#ifdef NDEBUG
+#ifndef NDEBUG
     if (addr > 4*1024)
         throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
 #endif
@@ -139,7 +138,7 @@ void Emulator::JP(std::uint16_t addr) {
 }
 
 void Emulator::CALL(std::uint16_t addr) {
-#ifdef NDEBUG
+#ifndef NDEBUG
     if (addr > 4*1024)
         throw std::runtime_error(INVALID_INSTRUCTION + ": \"Invalid address\"");
 #endif
@@ -352,7 +351,7 @@ void Emulator::loop() {
     [[maybe_unused]] std::vector<std::uint16_t> PCHistory{};  // Used for debugging
     while (PC != gameEnd && !quit) {
         auto start = std::chrono::high_resolution_clock::now();
-#ifdef NDEBUG
+#ifndef NDEBUG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
         PCHistory.emplace_back(reinterpret_cast<std::uint8_t *>(PC) - static_cast<std::uint8_t *>(memory) - 0x200);
