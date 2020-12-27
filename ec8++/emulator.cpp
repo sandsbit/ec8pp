@@ -101,7 +101,8 @@ void Emulator::initEmulatorThread() {
 }
 
 void Emulator::joinEmulatorThread() {
-    emulatorThread.join();
+    if (emulatorThread.joinable())
+        emulatorThread.join();
 }
 
 void Emulator::quitEmulatorThread() {
