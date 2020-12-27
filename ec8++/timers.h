@@ -33,12 +33,18 @@
 #include <utility>
 #include <atomic>
 #include <thread>
+#include <mutex>
+#include <chrono>
+#include <cstdint>
+#include <ratio>
 
 #include "openal.h"
 
 class Timers final {
 
 public:
+
+    typedef std::chrono::duration<std::int64_t, std::ratio<1, 60>> timer_value_t;
 
     static Timers &getInstance();
 
@@ -59,10 +65,9 @@ public:
 
 private:
 
-    static constexpr double MILLIS_TO_TIMER_VALUE = 60.0/1000;
-
-    unsigned long long int delayTimerFinalTime = 0;
-    std::atomic_ullong audioTimerFinalTime = 0;
+    std::chrono::time_point<std::chrono::high_resolution_clock> delayTimerFinalTime{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> audioTimerFinalTime{};
+    std::mutex audioTimerMutex;
 
     std::thread audioPlayThread;
     std::atomic_bool quit = false;

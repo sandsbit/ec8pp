@@ -38,19 +38,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static unsigned long long int nowMilliseconds() {
-    return static_cast<unsigned long long int>(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
-                ).count());
-}
-
 Timers &Timers::getInstance() {
     static Timers instance;
     return instance;
 }
 
 void Timers::initAudioThread() {
-    quit = false;
     audioPlayThread = std::thread(&Timers::audioLoop, this);
 }
 
@@ -63,34 +56,36 @@ void Timers::closeAudioThread() {
 }
 
 std::size_t Timers::getDelayTimerValue() const {
-    auto now = nowMilliseconds();
-    if (now >= delayTimerFinalTime)
+    auto tv = std::chrono::duration_cast<timer_value_t>(delayTimerFinalTime
+                                                            - std::chrono::high_resolution_clock::now()).count();
+    if (tv < 0)
         return 0;
     else
-        return static_cast<size_t>((static_cast<double>(delayTimerFinalTime - now)) * MILLIS_TO_TIMER_VALUE);
+        return static_cast<std::size_t>(tv);
 }
 
 void Timers::setDelayTimer(std::size_t value) {
-    delayTimerFinalTime = std::max(nowMilliseconds(), delayTimerFinalTime)
-                    + static_cast<std::size_t>(value / MILLIS_TO_TIMER_VALUE);
+    auto newValue = std::max(std::chrono::high_resolution_clock::now(), delayTimerFinalTime)
+                + std::chrono::duration_cast<std::chrono::nanoseconds>(timer_value_t(value));
+    delayTimerFinalTime = newValue;
 }
 
 void Timers::setAudioTimer(std::size_t value) {
-    auto now = nowMilliseconds();
-    if (audioTimerFinalTime >= now)
-        audioTimerFinalTime += static_cast<unsigned long long int>(static_cast<double>(value) / MILLIS_TO_TIMER_VALUE);
-    else
-        audioTimerFinalTime = now +
-                static_cast<unsigned long long int>((static_cast<double>(value) / MILLIS_TO_TIMER_VALUE));
+    std::lock_guard<std::mutex> lock(audioTimerMutex);
+    auto newValue = std::max(std::chrono::high_resolution_clock::now(), audioTimerFinalTime)
+                    + std::chrono::duration_cast<std::chrono::nanoseconds>(timer_value_t(value));
+    audioTimerFinalTime = newValue;
 }
 
 void Timers::audioLoop() {
     audioLoopInit();
     while (!quit) {
-        if (!playing && nowMilliseconds() <= audioTimerFinalTime)
+        audioTimerMutex.lock();
+        if (!playing && std::chrono::high_resolution_clock::now() <= audioTimerFinalTime)
             startPlayBeep();
-        if (playing && nowMilliseconds() > audioTimerFinalTime)
+        if (playing && std::chrono::high_resolution_clock::now() > audioTimerFinalTime)
             stopPlayBeep();
+        audioTimerMutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000/60));
     }
     audioLoopDestroy();
