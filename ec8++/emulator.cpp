@@ -272,12 +272,12 @@ void Emulator::LDT(std::uint8_t x) {
 
 void Emulator::LDTSET(std::uint8_t x) {
     assert(x <= 0xF);
-    timers->setDelayTimer(x);
+    timers->setDelayTimer(V[x]);
 }
 
 void Emulator::LDATSET(std::uint8_t x) {
     assert(x <= 0xF);
-    timers->setAudioTimer(x);
+    timers->setAudioTimer(V[x]);
 }
 
 void Emulator::ADDI(std::uint8_t x) {
