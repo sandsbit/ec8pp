@@ -37,6 +37,7 @@
 #include <random>
 #include <bit>
 #include <cassert>
+#include <iostream>
 
 #define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - reinterpret_cast<std::uint16_t *>(PC)))
 
@@ -107,7 +108,10 @@ void Emulator::quitEmulatorThread() {
     quit = true;
 }
 
-void Emulator::SYS([[maybe_unused]] std::uint16_t addr) {}
+void Emulator::SYS([[maybe_unused]] std::uint16_t addr) {
+    std::cout << "Use of SYS" << std::endl;
+    CALL(addr);
+}
 
 void Emulator::CLS() {
     graphics->clearScreen();
