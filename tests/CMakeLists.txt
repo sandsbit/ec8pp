@@ -7,7 +7,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenAL REQUIRED)
-find_package(SDL2 REQUIRED)
 
 add_executable(ec8pp_tests main.cpp ec8++/emulator.cpp ec8++/emulator_functions.h ../ec8++/emulator.cpp
         ../ec8++/timers.cpp ../ec8++/input.cpp ../ec8++/graphics.cpp)
@@ -21,7 +20,7 @@ if (APPLE)
     target_link_libraries(ec8pp_tests PUBLIC ${FrameworkOpenAL})
 endif()
 
-target_link_libraries(ec8pp_tests PUBLIC glfw glad openal sdl2)
+target_link_libraries(ec8pp_tests PUBLIC glfw glad openal)
 target_link_libraries(ec8pp_tests PRIVATE Threads::Threads)
 
 target_include_directories(ec8pp_tests PUBLIC ../lib ../ec8++)
