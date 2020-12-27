@@ -72,6 +72,8 @@ private:
     std::thread audioPlayThread;
     std::atomic_bool quit = false;
 
+    ALCdevice *device;
+    ALCcontext *context;
     ALuint buffer = 0;
     ALuint source = 0;
 
