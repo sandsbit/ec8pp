@@ -86,7 +86,6 @@ void Emulator::loadGame(const std::filesystem::path &file) {
     std::streamsize size = gamef.tellg();
     gamef.seekg(0, std::ios::beg);
 
-    assert(size % 2 == 0);
     gameEnd = reinterpret_cast<std::uint16_t *>(static_cast<std::uint8_t *>(memory) + 0x200 + size);
     gamef.read(reinterpret_cast<char *>(memory) + 0x200, size);
 }
