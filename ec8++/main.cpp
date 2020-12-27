@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
     else
         file = openFileDialog();
 
-    Input::getInstance().initInputThread();
     Timers::getInstance().initAudioThread();
 
     Emulator emulator(file);

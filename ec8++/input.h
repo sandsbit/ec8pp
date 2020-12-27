@@ -32,12 +32,9 @@
 
 #include <cstdint>
 #include <stdexcept>
-#include <thread>
-#include <mutex>
 #include <array>
-#include <atomic>
 
-#include "SDL2/SDL.h"
+#include "graphics.h"
 
 // TODO: Remove when Apple Clang add c++20 support
 #if __has_cpp_attribute(likely)
@@ -49,39 +46,39 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++20-extensions"
 // https://youtrack.jetbrains.com/issue/CPP-23503
-constexpr inline std::uint8_t getKeyCodeByBinding(SDL_KeyCode binding) {
+constexpr inline std::uint8_t getKeyCodeByBinding(int binding) {
     switch (binding) {
-        case SDLK_KP_0:
+        case GLFW_KEY_X:
             return 0x0;
-        case SDLK_KP_1:
-            return 0x7;
-        LIKELY case SDLK_KP_2:
-            return 0x8;
-        case SDLK_KP_3:
-            return 0x9;
-        LIKELY case SDLK_KP_4:
-            return 0x4;
-        case SDLK_KP_5:
-            return 0x5;
-        LIKELY case SDLK_KP_6:
-            return 0x6;
-        case SDLK_KP_7:
-            return 0x3;
-        LIKELY case SDLK_KP_8:
-            return 0x2;
-        case SDLK_KP_9:
+        case GLFW_KEY_1:
             return 0x1;
-        case SDLK_KP_PERIOD:
+        LIKELY case GLFW_KEY_2:
+            return 0x2;
+        case GLFW_KEY_3:
+            return 0x3;
+        LIKELY case GLFW_KEY_Q:
+            return 0x4;
+        case GLFW_KEY_W:
+            return 0x5;
+        LIKELY case GLFW_KEY_E:
+            return 0x6;
+        case GLFW_KEY_A:
+            return 0x7;
+        LIKELY case GLFW_KEY_S:
+            return 0x8;
+        case GLFW_KEY_D:
+            return 0x9;
+        case GLFW_KEY_Z:
             return 0xA;
-        case SDLK_KP_ENTER:
+        case GLFW_KEY_C:
             return 0xB;
-        case SDLK_KP_DIVIDE:
+        case GLFW_KEY_4:
             return 0xC;
-        case SDLK_KP_MULTIPLY:
+        case GLFW_KEY_R:
             return 0xD;
-        case SDLK_KP_MINUS:
+        case GLFW_KEY_F:
             return 0xE;
-        case SDLK_KP_PLUS:
+        case GLFW_KEY_V:
             return 0xF;
         default:
             return UINT8_MAX;
@@ -101,24 +98,17 @@ public:
     Input& operator=(const Input &) = delete;
     Input& operator=(Input &&) = delete;
 
-    void initInputThread();
-    void quitInputThread();
-    void joinInputThread();
-
     [[nodiscard]] bool isKeyPressed(std::uint8_t key) const;
     [[nodiscard]] std::uint8_t waitUntilKeyPress() const;
 
+    void keyGLFWCallback([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action,
+                         [[maybe_unused]] int mods);
+
 private:
 
-    void loop();
-
-    std::thread inputThread;
-    std::atomic_bool quit = false;
-
     std::array<bool, 16> keyPressed{};
-    mutable std::mutex keyPressedMutex;
-    std::atomic_uint8_t keysPressed = 0;
-    std::atomic_uint8_t lastKeyPressed = 0;
+    std::uint8_t keysPressed = 0;
+    std::uint8_t lastKeyPressed = 0;
 
     Input() = default;
     ~Input() = default;

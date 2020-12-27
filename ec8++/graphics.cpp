@@ -98,6 +98,10 @@ void Graphics::loop() {
     auto lastFPSCountTime = glfwGetTime();
     std::size_t frames = 0;
 
+    glfwSetKeyCallback(window, [](GLFWwindow *wind, int key, int scancode, int action, int mods) {
+        return Input::getInstance().keyGLFWCallback(wind, key, scancode, action, mods);
+    });
+
     while (!glfwWindowShouldClose(window) && !quit) {
         glfwPollEvents();
 
@@ -137,9 +141,6 @@ void Graphics::loop() {
 
     Timers::getInstance().closeAudioThread();
     Timers::getInstance().joinAudioThread();
-
-    Input::getInstance().quitInputThread();
-    Input::getInstance().joinInputThread();
 }
 #pragma clang diagnostic pop
 
