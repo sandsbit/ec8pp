@@ -292,9 +292,9 @@ void Emulator::LDISPR(std::uint8_t x) {
 
 void Emulator::LDBCD(std::uint8_t x) {
     assert(x <= 0xF);
-    *I = V[x] % 10;
+    *(I+2) = V[x] % 10;
     *(I+1) = (V[x] % 100 - *I) / 10;
-    *(I+2) = (V[x] - *I - *(I + 1)) / 100;
+    *I = (V[x] - *I - *(I + 1)) / 100;
 }
 
 void Emulator::LDREGMEM(std::uint8_t x) {
