@@ -36,6 +36,7 @@
 #include <sstream>
 #include <random>
 #include <bit>
+#include <cassert>
 
 #define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - reinterpret_cast<std::uint16_t *>(PC)))
 
