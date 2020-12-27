@@ -28,6 +28,7 @@
  */
 
 #include <filesystem>
+#include <cstring>
 
 #include "dialog.h"
 #include "emulator.h"
@@ -49,8 +50,11 @@ int main(int argc, char **argv) {
 
     Emulator emulator(file);
 
+    bool fullscreen = (argc >= 2 && strcmp(argv[1], "-fs") == 0)
+            || (argc >= 3 && (strcmp(argv[2], "-fs") == 0 || strcmp(argv[1], "-fs") == 0));
+
     Graphics &graphics = Graphics::getInstance();
-    graphics.init(&emulator);
+    graphics.init(&emulator, fullscreen);
 
     emulator.initEmulatorThread();
 
