@@ -85,7 +85,7 @@ private:
 
     Emulator *emulator = nullptr;
 
-    std::atomic_bool quit = false;
+    volatile std::atomic_bool quit = false;
 
     Graphics();
     virtual ~Graphics();

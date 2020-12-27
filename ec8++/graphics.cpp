@@ -31,6 +31,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <shared_mutex>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -119,7 +120,7 @@ void Graphics::loop() {
 
         glColor3f(0.2f, 0.3f, 0.3f);
         int i = -1;
-        screenMutex.lock();
+        std::unique_lock<std::mutex> screenUMutex(screenMutex);
         for (const auto &line : screen) {
             int yOffset = (++i) * PIXEL_WIDTH;
 
@@ -130,7 +131,7 @@ void Graphics::loop() {
                     glRecti(xOffset, yOffset, xOffset + PIXEL_WIDTH, yOffset + PIXEL_WIDTH);
             }
         }
-        screenMutex.unlock();
+        screenUMutex.unlock();
 
         glfwSwapBuffers(window);
     }
@@ -144,24 +145,24 @@ void Graphics::loop() {
 #pragma clang diagnostic pop
 
 void Graphics::clearScreen() {
-    screenMutex.lock();
+    std::lock_guard<std::mutex> lock(screenMutex);
     for (auto &line : screen)
         line.reset();
-    screenMutex.unlock();
 }
 
 std::uint8_t Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite) {
-    screenMutex.lock();
+    std::lock_guard<std::mutex> lock(screenMutex);
     bool collision;
     for (auto i = y; i < y + height; ++i) {
         std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + (i - y));
         for (auto j = x; j < x + 8; ++j) {
-            std::uint8_t pixel = (line >> (7-(j - x))) & 0b1;
-            collision = collision || (screen[i][j % 64] & pixel);
-            screen[i][j % 64] = screen[i][j] ^ pixel;
+            if (i < 32 && j < 64) {
+                std::uint8_t pixel = (line >> (7 - (j - x))) & 0b1;
+                collision = collision || (screen[i][j] & pixel);
+                screen[i][j] = screen[i][j] ^ pixel;
+            }
         }
     }
-    screenMutex.unlock();
     return collision;
 }
 

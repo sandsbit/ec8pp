@@ -38,6 +38,7 @@
 #include <bit>
 #include <cassert>
 #include <iostream>
+#include <mutex>
 
 #define INVALID_INSTRUCTION "Invalid instruction at " + numberToHexString(2*(PC - reinterpret_cast<std::uint16_t *>(PC)))
 
@@ -98,11 +99,12 @@ Emulator::~Emulator() {
 void Emulator::initEmulatorThread() {
     quit = false;
     emulatorThread = std::thread(&Emulator::loop, this);
+    emulatorThread.detach();
 }
 
 void Emulator::joinEmulatorThread() {
-    if (emulatorThread.joinable())
-        emulatorThread.join();
+    if (std::thread::id() != emulatorThread.get_id())
+        running.lock();
 }
 
 void Emulator::quitEmulatorThread() {
@@ -348,6 +350,7 @@ std::uint8_t nibbleFromInstructions(std::uint16_t instruction) {
 }
 
 void Emulator::loop() {
+    std::unique_lock<std::mutex> run(running);
     [[maybe_unused]] std::vector<std::uint16_t> PCHistory{};  // Used for debugging
     while (PC != gameEnd && !quit) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -500,4 +503,5 @@ void Emulator::loop() {
         }
     }
     graphics->quitGraphics();
+    running.lock();
 }

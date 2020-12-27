@@ -27,6 +27,8 @@
  *  see <https://www.gnu.org/licenses/>.
  */
 
+#include <mutex>
+#include <utility>
 #include <thread>
 #include <chrono>
 #include <algorithm>
@@ -104,11 +106,11 @@ Timers &Timers::getInstance() {
 
 void Timers::initAudioThread() {
     audioPlayThread = std::thread(&Timers::audioLoop, this);
+    audioPlayThread.detach();
 }
 
 void Timers::joinAudioThread() {
-    if (audioPlayThread.joinable())
-        audioPlayThread.join();
+    running.lock();
 }
 
 void Timers::closeAudioThread() {
@@ -138,14 +140,15 @@ void Timers::setAudioTimer(std::size_t value) {
 }
 
 void Timers::audioLoop() {
+    std::lock_guard<std::mutex> lock(running);
     audioLoopInit();
     while (!quit) {
-        audioTimerMutex.lock();
+        std::unique_lock<std::mutex> auMutex(audioTimerMutex);
         if (!playing && std::chrono::high_resolution_clock::now() <= audioTimerFinalTime)
             startPlayBeep();
         if (playing && std::chrono::high_resolution_clock::now() > audioTimerFinalTime)
             stopPlayBeep();
-        audioTimerMutex.unlock();
+        auMutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000/60));
     }
     audioLoopDestroy();

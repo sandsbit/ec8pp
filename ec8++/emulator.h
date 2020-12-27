@@ -37,6 +37,7 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
+#include <mutex>
 
 #include "graphics.h"
 #include "timers.h"
@@ -120,7 +121,8 @@ private:
     Input * const input = &Input::getInstance();
 
     std::thread emulatorThread;
-    std::atomic_bool quit = false;
+    volatile std::atomic_bool quit = false;
+    std::mutex running;
 
     void loadFontInMemory();
     void loadGame(const std::filesystem::path &file);

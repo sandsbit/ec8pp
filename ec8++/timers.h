@@ -70,7 +70,8 @@ private:
     std::mutex audioTimerMutex;
 
     std::thread audioPlayThread;
-    std::atomic_bool quit = false;
+    volatile std::atomic_bool quit = false;
+    std::mutex running;
 
     ALCdevice *device;
     ALCcontext *context;
