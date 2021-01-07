@@ -150,17 +150,15 @@ void Graphics::clearScreen() {
         line.reset();
 }
 
-std::uint8_t Graphics::drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite) {
+std::uint8_t Graphics::drawSprite(unsigned int x, unsigned int y, std::uint8_t height, void *sprite) {
     std::lock_guard<std::mutex> lock(screenMutex);
     bool collision;
     for (auto i = y; i < y + height; ++i) {
         std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + (i - y));
         for (auto j = x; j < x + 8; ++j) {
-            if (i < 32 && j < 64) {
-                std::uint8_t pixel = (line >> (7 - (j - x))) & 0b1;
-                collision = collision || (screen[i][j] & pixel);
-                screen[i][j] = screen[i][j] ^ pixel;
-            }
+            std::uint8_t pixel = (line >> (7 - (j - x))) & 0b1;
+            collision = collision || (screen[i % 32][j % 64] & pixel);
+            screen[i % 32][j % 64] = screen[i % 32][j % 64] ^ pixel;
         }
     }
     return collision;

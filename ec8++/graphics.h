@@ -72,7 +72,7 @@ public:
     void loop();
 
     void clearScreen();
-    std::uint8_t drawSprite(std::uint8_t x, std::uint8_t y, std::uint8_t height, void *sprite);
+    std::uint8_t drawSprite(unsigned int x, unsigned int y, std::uint8_t height, void *sprite);
 
 
 private:
