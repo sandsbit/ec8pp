@@ -152,7 +152,7 @@ void Graphics::clearScreen() {
 
 std::uint8_t Graphics::drawSprite(unsigned int x, unsigned int y, std::uint8_t height, void *sprite) {
     std::lock_guard<std::mutex> lock(screenMutex);
-    bool collision;
+    bool collision = false;
     for (auto i = y; i < y + height; ++i) {
         std::uint8_t line = *(static_cast<std::uint8_t *>(sprite) + (i - y));
         for (auto j = x; j < x + 8; ++j) {
